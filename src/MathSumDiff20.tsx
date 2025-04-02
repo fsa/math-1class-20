@@ -62,7 +62,7 @@ export function MathSumDiff20() {
   return (
     <>
       <div className="card">
-        <p>Сколько будет {question}=
+        <p>{question}=
           <input type="text" value={answer} onKeyDown={onKeyPress} onChange={(e) => setAnswer(e.target.value)} />
           <button type="button" onClick={onAnswer}>Ответить</button></p>
         <p>{message}</p>
