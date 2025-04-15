@@ -66,8 +66,8 @@ export function MathSumDiff20() {
           <input type="text" value={answer} onKeyDown={onKeyPress} onChange={(e) => setAnswer(e.target.value)} />
           <button type="button" onClick={onAnswer}>Ответить</button></p>
         <p>{message}</p>
-        <p>Правильных ответов: {count}</p>
-        <p>Неверных ответов: {wrongCount}</p>
+        <p className="success">Правильных ответов: {count}</p>
+        <p className="warning">Неверных ответов: {wrongCount}</p>
       </div>
     </>
   )
