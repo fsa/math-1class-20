@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 export function MathSumDiff20() {
   const [answer, setAnswer] = useState('')
   const [question, setQuestion] = useState<string>()
-  const [message, setMessage] = useState<string>()
+  const [message, setMessage] = useState<string | null>(null)
   const [rightAnswer, setRightAnswer] = useState<number>()
   const [count, setCount] = useState<number>(0)
   const [wrongCount, setWrongCount] = useState<number>(0)
@@ -65,7 +65,7 @@ export function MathSumDiff20() {
         <p>{question}=
           <input type="text" value={answer} onKeyDown={onKeyPress} onChange={(e) => setAnswer(e.target.value)} />
           <button type="button" onClick={onAnswer}>Ответить</button></p>
-        <p>{message}</p>
+        {message && <p>{message}</p>}
         <p className="success">Правильных ответов: {count}</p>
         <p className="warning">Неверных ответов: {wrongCount}</p>
       </div>
