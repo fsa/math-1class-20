@@ -33,8 +33,8 @@ body {
 #root {
   display: flex;
   width: 100%;
-  height: 100vh;
   justify-content: center;
+  align-items: center;
   text-align: center;
 }
 
@@ -47,7 +47,7 @@ body {
 
 @media (min-width: 400px) {
   #root {
-    align-items: center;
+    height: 100vh;
   }
 }
 
