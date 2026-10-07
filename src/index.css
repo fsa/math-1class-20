@@ -222,6 +222,26 @@ button:focus-visible {
   box-shadow: 0 0 0 4px var(--focus-ring);
 }
 
+.history-clear {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  padding: 0.625rem;
+  font: inherit;
+  font-size: clamp(0.875rem, 4vw, 1rem);
+  color: var(--danger);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.history-clear:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
 .history-list {
   list-style: none;
   margin: 0.5rem 0 0;
@@ -257,6 +277,12 @@ button:focus-visible {
 .history-q {
   flex: 1 1 auto;
   overflow-wrap: anywhere;
+}
+
+.history-wrong {
+  color: var(--danger);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
 }
 
 .history-ok {

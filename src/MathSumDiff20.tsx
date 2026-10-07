@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import {
+  emptyProgress,
   loadProgress,
   saveProgress,
   MAX_HISTORY,
@@ -75,6 +76,11 @@ export function MathSumDiff20() {
 
   const messageClass = isCorrect === null ? '' : isCorrect ? 'success-text' : 'error-text'
 
+  const clearHistory = () => {
+    setProgress(emptyProgress())
+    inputRef.current?.focus()
+  }
+
   return (
     <form className="card" onSubmit={onSubmit}>
       <p className="question">{current.text}=</p>
@@ -107,28 +113,34 @@ export function MathSumDiff20() {
 
       <details className="history">
         <summary>История ({progress.history.length})</summary>
-        {progress.history.length === 0 ? (
-          <p className="history-empty">Пока нет ответов</p>
-        ) : (
-          <ul className="history-list">
-            {progress.history.map((entry, i) => (
-              <li key={`${entry.ts}-${i}`} className="history-item">
-                <span className="history-q">
-                  {entry.text}={entry.given}
-                </span>
-                <span className={entry.ok ? 'history-ok' : 'history-err'}>
-                  {entry.ok ? '✓' : `✗ верно: ${entry.correct}`}
-                </span>
-                <time className="history-time" dateTime={new Date(entry.ts).toISOString()}>
-                  {new Date(entry.ts).toLocaleTimeString('ru-RU', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </time>
-              </li>
-            ))}
-          </ul>
-        )}
+        <div className="history-body">
+          <button type="button" className="history-clear" onClick={clearHistory}>
+            Очистить
+          </button>
+          {progress.history.length === 0 ? (
+            <p className="history-empty">Пока нет ответов</p>
+          ) : (
+            <ul className="history-list">
+              {progress.history.map((entry, i) => (
+                <li key={`${entry.ts}-${i}`} className="history-item">
+                  <span className="history-q">
+                    {entry.text}=
+                    <span className={entry.ok ? undefined : 'history-wrong'}>{entry.given}</span>
+                  </span>
+                  <span className={entry.ok ? 'history-ok' : 'history-err'}>
+                    {entry.ok ? '✓' : '✗'}
+                  </span>
+                  <time className="history-time" dateTime={new Date(entry.ts).toISOString()}>
+                    {new Date(entry.ts).toLocaleTimeString('ru-RU', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </time>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </details>
     </form>
   )
