@@ -22,7 +22,7 @@ export function generateMultiplyDivide(): Question {
   const a = 1 + Math.floor(Math.random() * MAX_FACTOR)
   const b = 1 + Math.floor(Math.random() * MAX_FACTOR)
   if (Math.random() > 0.5) {
-    return { text: `${a}×${b}`, answer: a * b }
+    return { text: `${a}·${b}`, answer: a * b }
   }
-  return { text: `${a * b}÷${b}`, answer: a }
+  return { text: `${a * b}:${b}`, answer: a }
 }
