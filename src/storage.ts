@@ -12,7 +12,8 @@ export type Progress = {
   history: HistoryEntry[]
 }
 
-const STORAGE_KEY = 'math1class20:progress:v1'
+export const STORAGE_KEY_SUM = 'math1class20:progress:v1'
+export const STORAGE_KEY_MULTIPLY = 'math1class20:multiply:v1'
 export const MAX_HISTORY = 50
 
 export function emptyProgress(): Progress {
@@ -37,9 +38,9 @@ const isHistoryEntry = (value: unknown): value is HistoryEntry => {
   )
 }
 
-export function loadProgress(): Progress {
+export function loadProgress(key: string): Progress {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(key)
     if (!raw) return emptyProgress()
     const data = JSON.parse(raw) as Partial<Progress>
     if (!data || typeof data !== 'object') return emptyProgress()
@@ -55,9 +56,9 @@ export function loadProgress(): Progress {
   }
 }
 
-export function saveProgress(progress: Progress): void {
+export function saveProgress(key: string, progress: Progress): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
+    localStorage.setItem(key, JSON.stringify(progress))
   } catch {
     // приватный режим или переполненное хранилище — работаем без сохранения
   }

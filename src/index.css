@@ -71,6 +71,36 @@ body {
   font-size: clamp(1.125rem, 6vw + 0.25rem, 1.75rem);
 }
 
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(0.5rem, 2vw, 0.75rem);
+  width: 100%;
+  max-width: 28rem;
+  margin-bottom: clamp(0.75rem, 3vw, 1.25rem);
+}
+
+.tabs .tab {
+  flex: 1 1 auto;
+  min-height: 44px;
+  padding: 0.4em 0.75em;
+  font-size: clamp(0.875rem, 4vw, 1.125rem);
+  white-space: nowrap;
+  opacity: 0.75;
+}
+
+.tabs .tab[aria-selected='true'] {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  opacity: 1;
+}
+
+.tab-panel[hidden] {
+  display: none;
+}
+
 .card {
   display: flex;
   flex-direction: column;

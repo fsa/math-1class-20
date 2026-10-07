@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useEffect, useId, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import {
   emptyProgress,
   loadProgress,
@@ -7,39 +7,29 @@ import {
   type HistoryEntry,
   type Progress,
 } from './storage.ts'
+import type { Question } from './questions.ts'
 
-type Question = {
-  text: string
-  answer: number
+type TrainerProps = {
+  storageKey: string
+  generate: () => Question
+  answerMaxLength?: number
 }
 
-const MAX_SUM = 20
-
-function generateQuestion(): Question {
-  if (Math.random() > 0.5) {
-    const a = 1 + Math.floor(Math.random() * (MAX_SUM - 1))
-    const b = 1 + Math.floor(Math.random() * (MAX_SUM - a))
-    return { text: `${a}+${b}`, answer: a + b }
-  }
-  const minuend = 2 + Math.floor(Math.random() * (MAX_SUM - 1))
-  const subtrahend = 1 + Math.floor(Math.random() * (minuend - 1))
-  return { text: `${minuend}-${subtrahend}`, answer: minuend - subtrahend }
-}
-
-export function MathSumDiff20() {
-  const [progress, setProgress] = useState<Progress>(loadProgress)
-  const [current, setCurrent] = useState<Question>(generateQuestion)
+export function Trainer({ storageKey, generate, answerMaxLength = 2 }: TrainerProps) {
+  const answerId = useId()
+  const [progress, setProgress] = useState<Progress>(() => loadProgress(storageKey))
+  const [current, setCurrent] = useState<Question>(generate)
   const [answer, setAnswer] = useState('')
   const [message, setMessage] = useState<string | null>(null)
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    saveProgress(progress)
-  }, [progress])
+    saveProgress(storageKey, progress)
+  }, [storageKey, progress])
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setAnswer(e.target.value.replace(/\D/g, '').slice(0, 2))
+    setAnswer(e.target.value.replace(/\D/g, '').slice(0, answerMaxLength))
   }
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -59,7 +49,7 @@ export function MathSumDiff20() {
 
     if (ok) {
       setMessage(`Правильно! ${current.text}=${current.answer}`)
-      setCurrent(generateQuestion())
+      setCurrent(generate())
     } else {
       setMessage(`Неправильно! ${given} — это неверный ответ!`)
     }
@@ -74,25 +64,25 @@ export function MathSumDiff20() {
     inputRef.current?.focus()
   }
 
-  const messageClass = isCorrect === null ? '' : isCorrect ? 'success-text' : 'error-text'
-
   const clearHistory = () => {
     setProgress(emptyProgress())
     inputRef.current?.focus()
   }
 
+  const messageClass = isCorrect === null ? '' : isCorrect ? 'success-text' : 'error-text'
+
   return (
     <form className="card" onSubmit={onSubmit}>
       <p className="question">{current.text}=</p>
       <div className="answer-row">
-        <label htmlFor="answer">Ответ</label>
+        <label htmlFor={answerId}>Ответ</label>
         <input
-          id="answer"
+          id={answerId}
           ref={inputRef}
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
-          maxLength={2}
+          maxLength={answerMaxLength}
           autoComplete="off"
           autoCapitalize="off"
           autoCorrect="off"
