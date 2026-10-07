@@ -1,3 +1,5 @@
+import type { Question } from './questions.ts'
+
 export type HistoryEntry = {
   text: string
   given: number
@@ -10,6 +12,7 @@ export type Progress = {
   count: number
   wrongCount: number
   history: HistoryEntry[]
+  current?: Question
 }
 
 export const STORAGE_KEY_SUM = 'math1class20:progress:v1'
@@ -38,6 +41,12 @@ const isHistoryEntry = (value: unknown): value is HistoryEntry => {
   )
 }
 
+const isQuestion = (value: unknown): value is Question => {
+  if (!value || typeof value !== 'object') return false
+  const q = value as Partial<Question>
+  return typeof q.text === 'string' && typeof q.answer === 'number' && Number.isFinite(q.answer)
+}
+
 export function loadProgress(key: string): Progress {
   try {
     const raw = localStorage.getItem(key)
@@ -50,6 +59,7 @@ export function loadProgress(key: string): Progress {
       history: Array.isArray(data.history)
         ? data.history.filter(isHistoryEntry).slice(0, MAX_HISTORY)
         : [],
+      current: isQuestion(data.current) ? data.current : undefined,
     }
   } catch {
     return emptyProgress()

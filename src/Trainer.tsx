@@ -19,8 +19,11 @@ type TrainerProps = {
 
 export function Trainer({ storageKey, generate, answerMaxLength = 2 }: TrainerProps) {
   const answerId = useId()
-  const [progress, setProgress] = useState<Progress>(() => loadProgress(storageKey))
-  const [current, setCurrent] = useState<Question>(generate)
+  const [progress, setProgress] = useState<Progress & { current: Question }>(() => {
+    const p = loadProgress(storageKey)
+    return { ...p, current: p.current ?? generate() }
+  })
+  const current = progress.current
   const [answer, setAnswer] = useState('')
   const [message, setMessage] = useState<string | null>(null)
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
@@ -62,9 +65,10 @@ export function Trainer({ storageKey, generate, answerMaxLength = 2 }: TrainerPr
       ts: Date.now(),
     }
 
+    const next = ok ? generate() : current
+
     if (ok) {
       setMessage(`Правильно! ${current.text}=${current.answer}`)
-      setCurrent(generate())
     } else {
       setMessage(`Неправильно! ${given} — это неверный ответ!`)
     }
@@ -74,6 +78,7 @@ export function Trainer({ storageKey, generate, answerMaxLength = 2 }: TrainerPr
       count: p.count + (ok ? 1 : 0),
       wrongCount: p.wrongCount + (ok ? 0 : 1),
       history: [entry, ...p.history].slice(0, MAX_HISTORY),
+      current: next,
     }))
     setAnswer('')
     if (!isTouch) {
@@ -82,7 +87,7 @@ export function Trainer({ storageKey, generate, answerMaxLength = 2 }: TrainerPr
   }
 
   const clearHistory = () => {
-    setProgress(emptyProgress())
+    setProgress({ ...emptyProgress(), current })
     if (!isTouch) {
       inputRef.current?.focus()
     }

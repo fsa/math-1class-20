@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Trainer } from './Trainer.tsx'
 import { generateMultiplyDivide, generateSumDiff } from './questions.ts'
 import { STORAGE_KEY_MULTIPLY, STORAGE_KEY_SUM } from './storage.ts'
 
 type TabId = 'sum' | 'multiply'
+
+const tabFromHash = (): TabId => (window.location.hash === '#multiply' ? 'multiply' : 'sum')
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'sum', label: 'Сложение и вычитание' },
@@ -11,7 +13,18 @@ const TABS: { id: TabId; label: string }[] = [
 ]
 
 export function App() {
-  const [tab, setTab] = useState<TabId>('sum')
+  const [tab, setTab] = useState<TabId>(tabFromHash)
+
+  useEffect(() => {
+    const onHashChange = () => setTab(tabFromHash())
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
+
+  const selectTab = (next: TabId) => {
+    setTab(next)
+    history.replaceState(null, '', `#${next}`)
+  }
 
   return (
     <>
@@ -25,7 +38,7 @@ export function App() {
             aria-selected={tab === id}
             aria-controls={`panel-${id}`}
             className="tab"
-            onClick={() => setTab(id)}
+            onClick={() => selectTab(id)}
           >
             {label}
           </button>
