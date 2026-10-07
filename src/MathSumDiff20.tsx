@@ -1,74 +1,135 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
+import {
+  loadProgress,
+  saveProgress,
+  MAX_HISTORY,
+  type HistoryEntry,
+  type Progress,
+} from './storage.ts'
+
+type Question = {
+  text: string
+  answer: number
+}
+
+const MAX_SUM = 20
+
+function generateQuestion(): Question {
+  if (Math.random() > 0.5) {
+    const a = 1 + Math.floor(Math.random() * (MAX_SUM - 1))
+    const b = 1 + Math.floor(Math.random() * (MAX_SUM - a))
+    return { text: `${a}+${b}`, answer: a + b }
+  }
+  const minuend = 2 + Math.floor(Math.random() * (MAX_SUM - 1))
+  const subtrahend = 1 + Math.floor(Math.random() * (minuend - 1))
+  return { text: `${minuend}-${subtrahend}`, answer: minuend - subtrahend }
+}
 
 export function MathSumDiff20() {
+  const [progress, setProgress] = useState<Progress>(loadProgress)
+  const [current, setCurrent] = useState<Question>(generateQuestion)
   const [answer, setAnswer] = useState('')
-  const [question, setQuestion] = useState<string>()
   const [message, setMessage] = useState<string | null>(null)
-  const [rightAnswer, setRightAnswer] = useState<number>()
-  const [count, setCount] = useState<number>(0)
-  const [wrongCount, setWrongCount] = useState<number>(0)
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    createQuestion()
-  }, [])
+    saveProgress(progress)
+  }, [progress])
 
-  const onKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      onAnswer()
-    }
-    if (e.key === 'Backspace') {
-      return
-    }
-    if (!/[0-9]/.test(e.key)) {
-      e.preventDefault();
-    }
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setAnswer(e.target.value.replace(/\D/g, '').slice(0, 2))
   }
 
-  const onAnswer = () => {
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     if (!answer) {
       return
     }
-    let yourAnswer = Number(answer)
-    if (rightAnswer == yourAnswer) {
-      setMessage('Правильно! ' + question + '=' + rightAnswer)
-      createQuestion()
-      setCount(count + 1)
-    } else {
-      console.log(yourAnswer, rightAnswer)
-      setMessage('Неправильно! ' + yourAnswer + ' — это неверный ответ!')
-      setWrongCount(wrongCount + 1)
+    const given = Number(answer)
+    const ok = given === current.answer
+    const entry: HistoryEntry = {
+      text: current.text,
+      given,
+      correct: current.answer,
+      ok,
+      ts: Date.now(),
     }
+
+    if (ok) {
+      setMessage(`Правильно! ${current.text}=${current.answer}`)
+      setCurrent(generateQuestion())
+    } else {
+      setMessage(`Неправильно! ${given} — это неверный ответ!`)
+    }
+    setIsCorrect(ok)
+    setProgress((p) => ({
+      ...p,
+      count: p.count + (ok ? 1 : 0),
+      wrongCount: p.wrongCount + (ok ? 0 : 1),
+      history: [entry, ...p.history].slice(0, MAX_HISTORY),
+    }))
     setAnswer('')
+    inputRef.current?.focus()
   }
 
-  const createQuestion = () => {
-    const firstDigit = Math.floor(Math.random() * 10) + 1;
-    const secondDigit = Math.floor(Math.random() * 10) + 1;
-    const sumDigit = firstDigit + secondDigit
-    if (Math.random() > 0.5) {
-      setRightAnswer(sumDigit)
-      setQuestion(firstDigit + "+" + secondDigit)
-    } else {
-      if (Math.random() > 0.5) {
-        setRightAnswer(firstDigit)
-        setQuestion(sumDigit + "-" + secondDigit)
-      } else {
-        setRightAnswer(secondDigit)
-        setQuestion(sumDigit + "-" + firstDigit)
-      }
-    }
-  }
+  const messageClass = isCorrect === null ? '' : isCorrect ? 'success-text' : 'error-text'
 
   return (
-    <>
-      <div className="card">
-        <p>{question}=
-          <input type="text" value={answer} onKeyDown={onKeyPress} onChange={(e) => setAnswer(e.target.value)} />
-          <button type="button" onClick={onAnswer}>Ответить</button></p>
-        {message && <p>{message}</p>}
-        <p className="success">Правильных ответов: {count}</p>
-        <p className="warning">Неверных ответов: {wrongCount}</p>
+    <form className="card" onSubmit={onSubmit}>
+      <p className="question">{current.text}=</p>
+      <div className="answer-row">
+        <label htmlFor="answer">Ответ</label>
+        <input
+          id="answer"
+          ref={inputRef}
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={2}
+          autoComplete="off"
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
+          placeholder="?"
+          value={answer}
+          onChange={onChange}
+        />
+        <button type="submit">Ответить</button>
       </div>
-    </>
+      <p className={`message ${messageClass}`} aria-live="polite">
+        {message}
+      </p>
+      <p className="stats">
+        <span className="success">Правильных ответов: {progress.count}</span>
+        <span className="warning">Неверных ответов: {progress.wrongCount}</span>
+      </p>
+
+      <details className="history">
+        <summary>История ({progress.history.length})</summary>
+        {progress.history.length === 0 ? (
+          <p className="history-empty">Пока нет ответов</p>
+        ) : (
+          <ul className="history-list">
+            {progress.history.map((entry, i) => (
+              <li key={`${entry.ts}-${i}`} className="history-item">
+                <span className="history-q">
+                  {entry.text}={entry.given}
+                </span>
+                <span className={entry.ok ? 'history-ok' : 'history-err'}>
+                  {entry.ok ? '✓' : `✗ верно: ${entry.correct}`}
+                </span>
+                <time className="history-time" dateTime={new Date(entry.ts).toISOString()}>
+                  {new Date(entry.ts).toLocaleTimeString('ru-RU', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </time>
+              </li>
+            ))}
+          </ul>
+        )}
+      </details>
+    </form>
   )
 }

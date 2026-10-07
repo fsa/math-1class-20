@@ -2,96 +2,275 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  font-size: 1.6em;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+
+  --bg: #242424;
+  --bg-card: #2f2f33;
+  --fg: rgba(255, 255, 255, 0.87);
+  --fg-muted: rgba(255, 255, 255, 0.6);
+  --border: #747bff;
+  --accent: #646cff;
+  --btn-bg: #3a3a40;
+  --btn-bg-hover: #46464e;
+  --success: #4caf50;
+  --danger: #ff6b6b;
+  --field-bg: #1f1f22;
+  --focus-ring: rgba(100, 108, 255, 0.6);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #ffffff;
+    --bg-card: #f5f6f8;
+    --fg: #213547;
+    --fg-muted: #5b6b7c;
+    --border: #747bff;
+    --accent: #535bf2;
+    --btn-bg: #ffffff;
+    --btn-bg-hover: #ececf1;
+    --success: #1a7f37;
+    --danger: #d1242f;
+    --field-bg: #ffffff;
+    --focus-ring: rgba(83, 91, 242, 0.5);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  background-color: var(--bg);
+  color: var(--fg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: clamp(1rem, 5vw, 2rem)
+    max(clamp(0.75rem, 4vw, 2rem), env(safe-area-inset-left))
+    max(clamp(1rem, 5vw, 2rem), env(safe-area-inset-bottom))
+    max(clamp(0.75rem, 4vw, 2rem), env(safe-area-inset-right));
+  text-align: center;
+  font-size: clamp(1.125rem, 6vw + 0.25rem, 1.75rem);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.75rem, 3vw, 1.25rem);
+  width: 100%;
+  max-width: 28rem;
+  padding: clamp(1rem, 5vw, 2rem);
+  background-color: var(--bg-card);
+  border: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
+  border-radius: 16px;
 }
 
 p {
   margin: 0;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+.question {
+  font-size: clamp(2rem, 14vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
+.answer-row {
   display: flex;
-  min-width: 320px;
-}
-
-#root {
-  display: flex;
-  width: 100%;
+  flex-wrap: wrap;
   justify-content: center;
-  text-align: center;
+  align-items: center;
+  gap: clamp(0.5rem, 3vw, 1rem);
+  width: 100%;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-}
-
-@media (min-width: 400px) {
-  #root {
-    font-size: 2em;
-    height: 100vh;
-    align-items: center;
-  }
+.answer-row label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 input {
-  border-radius: 8px;
-  padding: 0.2em;
-  font-size: 1em;
-  font-weight: 500;
+  min-height: 48px;
+  min-width: 4ch;
+  width: auto;
+  max-width: 6ch;
+  padding: 0.25em 0.5em;
+  font-size: clamp(1.25rem, 7vw, 2rem);
+  font-weight: 600;
   font-family: inherit;
-  width: 3em;
+  text-align: center;
+  color: var(--fg);
+  background-color: var(--field-bg);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  touch-action: manipulation;
 }
 
-.card {
-  display: flex;
-  flex-direction: column;
-  justify-items: center;
-}
-
-.success {
-  color: green;
-}
-
-.warning {
-  color: red;
+input:focus,
+input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--focus-ring);
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid #747bff;
-  padding: 0.2em 0.4em;
-  margin: 0.4em;
-  font-size: 1em;
-  font-weight: 500;
+  min-height: 48px;
+  padding: 0.5em 1.4em;
+  font-size: clamp(1rem, 5vw, 1.375rem);
+  font-weight: 600;
   font-family: inherit;
-  background-color: #f9f9f9;
+  color: var(--fg);
+  background-color: var(--btn-bg);
+  border: 2px solid var(--border);
+  border-radius: 10px;
   cursor: pointer;
-  transition: border-color 0.25s;
+  touch-action: manipulation;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
 }
 
 button:hover {
-  border-color: red;
+  background-color: var(--btn-bg-hover);
+  border-color: var(--accent);
+}
+
+button:active {
+  transform: scale(0.97);
 }
 
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: none;
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.message {
+  min-height: 1.5em;
+  max-width: 100%;
+  font-size: clamp(1rem, 5vw, 1.375rem);
+  overflow-wrap: anywhere;
+}
+
+.message.success-text {
+  color: var(--success);
+}
+
+.message.error-text {
+  color: var(--danger);
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25em 1.5em;
+  font-size: clamp(0.9375rem, 4.5vw, 1.125rem);
+  color: var(--fg-muted);
+}
+
+.stats .success {
+  color: var(--success);
+}
+
+.stats .warning {
+  color: var(--danger);
+}
+
+.history {
+  width: 100%;
+  max-width: 26rem;
+  text-align: left;
+}
+
+.history summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.9375rem, 4.5vw, 1.125rem);
+  color: var(--fg-muted);
+  cursor: pointer;
+  touch-action: manipulation;
+  border-radius: 8px;
+}
+
+.history summary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.history-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0.5rem;
+  max-height: 40vh;
+  overflow-y: auto;
+  background-color: var(--field-bg);
+  border: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
+  border-radius: 10px;
+}
+
+.history-empty {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: clamp(0.875rem, 4vw, 1rem);
+  color: var(--fg-muted);
+}
+
+.history-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25em 0.75em;
+  padding: 0.3em 0.4em;
+  font-size: clamp(0.875rem, 4vw, 1rem);
+  border-radius: 6px;
+}
+
+.history-item + .history-item {
+  border-top: 1px solid color-mix(in srgb, var(--fg-muted) 25%, transparent);
+}
+
+.history-q {
+  flex: 1 1 auto;
+  overflow-wrap: anywhere;
+}
+
+.history-ok {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.history-err {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.history-time {
+  flex: 0 0 auto;
+  font-size: 0.85em;
+  color: var(--fg-muted);
 }
