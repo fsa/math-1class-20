@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { Trainer } from './Trainer.tsx'
-import { generateMultiply, generateSumDiff } from './questions.ts'
+import { generateMultiplyDivide, generateSumDiff } from './questions.ts'
 import { STORAGE_KEY_MULTIPLY, STORAGE_KEY_SUM } from './storage.ts'
 
 type TabId = 'sum' | 'multiply'
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'sum', label: 'Сложение и вычитание' },
-  { id: 'multiply', label: 'Таблица умножения' },
+  { id: 'multiply', label: 'Умножение и деление' },
 ]
 
 export function App() {
@@ -49,7 +49,7 @@ export function App() {
         hidden={tab !== 'multiply'}
         className="tab-panel"
       >
-        <Trainer storageKey={STORAGE_KEY_MULTIPLY} generate={generateMultiply} />
+        <Trainer storageKey={STORAGE_KEY_MULTIPLY} generate={generateMultiplyDivide} />
       </div>
     </>
   )

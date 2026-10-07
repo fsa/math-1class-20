@@ -18,8 +18,11 @@ export function generateSumDiff(): Question {
 
 const MAX_FACTOR = 9
 
-export function generateMultiply(): Question {
+export function generateMultiplyDivide(): Question {
   const a = 1 + Math.floor(Math.random() * MAX_FACTOR)
   const b = 1 + Math.floor(Math.random() * MAX_FACTOR)
-  return { text: `${a}×${b}`, answer: a * b }
+  if (Math.random() > 0.5) {
+    return { text: `${a}×${b}`, answer: a * b }
+  }
+  return { text: `${a * b}÷${b}`, answer: a }
 }
