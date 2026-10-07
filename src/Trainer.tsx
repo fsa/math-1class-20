@@ -8,6 +8,8 @@ import {
   type Progress,
 } from './storage.ts'
 import type { Question } from './questions.ts'
+import { useIsTouch } from './useIsTouch.ts'
+import { Keypad } from './Keypad.tsx'
 
 type TrainerProps = {
   storageKey: string
@@ -23,13 +25,26 @@ export function Trainer({ storageKey, generate, answerMaxLength = 2 }: TrainerPr
   const [message, setMessage] = useState<string | null>(null)
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const isTouch = useIsTouch()
 
   useEffect(() => {
     saveProgress(storageKey, progress)
   }, [storageKey, progress])
 
+  useEffect(() => {
+    inputRef.current?.setAttribute('virtualkeyboardpolicy', isTouch ? 'manual' : 'auto')
+  }, [isTouch])
+
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setAnswer(e.target.value.replace(/\D/g, '').slice(0, answerMaxLength))
+  }
+
+  const pressDigit = (digit: string) => {
+    setAnswer((prev) => (prev === '0' ? digit : (prev + digit).slice(0, answerMaxLength)))
+  }
+
+  const pressBackspace = () => {
+    setAnswer((prev) => prev.slice(0, -1))
   }
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -61,26 +76,31 @@ export function Trainer({ storageKey, generate, answerMaxLength = 2 }: TrainerPr
       history: [entry, ...p.history].slice(0, MAX_HISTORY),
     }))
     setAnswer('')
-    inputRef.current?.focus()
+    if (!isTouch) {
+      inputRef.current?.focus()
+    }
   }
 
   const clearHistory = () => {
     setProgress(emptyProgress())
-    inputRef.current?.focus()
+    if (!isTouch) {
+      inputRef.current?.focus()
+    }
   }
 
   const messageClass = isCorrect === null ? '' : isCorrect ? 'success-text' : 'error-text'
 
   return (
     <form className="card" onSubmit={onSubmit}>
-      <p className="question">{current.text}=</p>
       <div className="answer-row">
+        <p className="question">{current.text}=</p>
         <label htmlFor={answerId}>Ответ</label>
         <input
           id={answerId}
           ref={inputRef}
           type="text"
-          inputMode="numeric"
+          inputMode={isTouch ? 'none' : 'numeric'}
+          readOnly={isTouch}
           pattern="[0-9]*"
           maxLength={answerMaxLength}
           autoComplete="off"
@@ -91,7 +111,9 @@ export function Trainer({ storageKey, generate, answerMaxLength = 2 }: TrainerPr
           value={answer}
           onChange={onChange}
         />
-        <button type="submit">Ответить</button>
+        <button type="submit" aria-label="Ответить">
+          ✓
+        </button>
       </div>
       <p className={`message ${messageClass}`} aria-live="polite">
         {message}
@@ -132,6 +154,7 @@ export function Trainer({ storageKey, generate, answerMaxLength = 2 }: TrainerPr
           )}
         </div>
       </details>
+      {isTouch && <Keypad onDigit={pressDigit} onBackspace={pressBackspace} />}
     </form>
   )
 }
